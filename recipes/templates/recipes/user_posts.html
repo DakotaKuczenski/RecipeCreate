@@ -1,0 +1,68 @@
+{% extends "recipes/base.html" %}
+{% block content %}
+
+        {% for post in posts %}
+            {% if forloop.counter0 == 0 %}
+                <div class="media">
+                        <img class="account-img" src="{{ post.author.profile.image.url }}">
+                        <div class="media-body">
+                            <h5 class="my-1">{{ post.author.profile.bio }}</h5>
+                        </div>
+                        <form class="form-inline my-2 my-sm-0" method="GET" action={% url 'search_post' %}>
+                            <button class="btn btn-outline-info btn-md my-0 type="submit">Follow</button>
+                        </form>
+                    </div>
+            {% endif %}
+        {% endfor %}
+
+    <h1 class="mb-3">Post by {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>
+    {% for post in posts %}
+        <article class="media content-section">
+            <img class="article-img"src="{{ post.recipe_image.url }}">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+                    <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+
+                    {% if request.user.is_authenticated %}
+                        {% if not is_favorite %}
+                        <a href="{% url 'favorite_post' post.pk %}">
+                            <i class=" fas fa-heart fa-lg"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'favorite_post' post.pk %}">
+                            <i class="far fa-heart fa-lg"></i>
+                        </a>
+                        {% endif %}
+                    {% endif %}
+
+                </div>
+                <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                <p class="article-content">Description- {{ post.description }}</p>
+                <p class="article-content">Diet- {{ post.Diet }}</p>
+
+            </div>
+        </article>
+    {% endfor %}
+
+    {% if is_paginated %}
+
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+
+    {% endif %}
+{% endblock content %}
